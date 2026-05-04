@@ -1,0 +1,14 @@
+{
+  "name": "Scholeduc",
+  "description": "A comprehensive educational management system focusing on simplicity, collaboration, and custom academic workflows.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "AI-powered assignment generation",
+    "Real-time announcements and comments",
+    "Comprehensive grading system",
+    "Google Workspace-style collaboration"
+  ]
+}

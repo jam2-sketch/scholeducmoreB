@@ -1,0 +1,138 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Represents a student, teacher, or admin in the system.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "role": { "type": "string", "enum": ["teacher", "student", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Class": {
+      "title": "Classroom",
+      "description": "A group where teachers share materials and students learn.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "section": { "type": "string" },
+        "description": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "joinCode": { "type": "string" },
+        "themeColor": { "type": "string" },
+        "bannerImage": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "ownerId", "joinCode"]
+    },
+    "Enrollment": {
+      "title": "Class Enrollment",
+      "description": "Mapping between a user and a class.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "classId": { "type": "string" },
+        "role": { "type": "string", "enum": ["teacher", "student"] },
+        "enrolledAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "classId"]
+    },
+    "Post": {
+      "title": "Stream Post",
+      "description": "An announcement or notification in the class stream.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "classId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "authorName": { "type": "string" },
+        "authorPhoto": { "type": "string" },
+        "content": { "type": "string" },
+        "type": { "type": "string", "enum": ["announcement", "assignment"] },
+        "attachmentUrl": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["classId", "authorId", "authorName", "content", "type"]
+    },
+    "Assignment": {
+      "title": "Assignment",
+      "description": "Work assigned to students with a deadline.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "classId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "dueDate": { "type": "string", "format": "date-time" },
+        "points": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["classId", "title"]
+    },
+    "Submission": {
+      "title": "Assignment Submission",
+      "description": "Work submitted by a student for an assignment.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "assignmentId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "content": { "type": "string" },
+        "status": { "type": "string", "enum": ["submitted", "graded", "returned"] },
+        "grade": { "type": "number" },
+        "feedback": { "type": "string" },
+        "submittedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["assignmentId", "studentId", "content"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "A comment on a post or submission.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "parentId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["parentId", "authorId", "content"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/classes/{classId}": {
+      "schema": "Class",
+      "description": "Classroom details"
+    },
+    "/classes/{classId}/enrollments/{enrollmentId}": {
+      "schema": "Enrollment",
+      "description": "Members of a class"
+    },
+    "/classes/{classId}/posts/{postId}": {
+      "schema": "Post",
+      "description": "Announcements and notifications"
+    },
+    "/classes/{classId}/posts/{postId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Comments on announcements"
+    },
+    "/classes/{classId}/assignments/{assignmentId}": {
+      "schema": "Assignment",
+      "description": "Assignments within a class"
+    },
+    "/classes/{classId}/assignments/{assignmentId}/submissions/{submissionId}": {
+      "schema": "Submission",
+      "description": "Student submissions for an assignment"
+    }
+  }
+}

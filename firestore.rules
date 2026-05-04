@@ -1,0 +1,134 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return request.auth.token.email_verified == true; }
+    function userId() { return request.auth.uid; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    // Check if user is a member of the class
+    function isClassMember(classId) {
+      return exists(/databases/$(database)/documents/classes/$(classId)/enrollments/$(userId()));
+    }
+    
+    function isClassTeacher(classId) {
+      return get(/databases/$(database)/documents/classes/$(classId)).data.ownerId == userId();
+    }
+
+    // --- User Profiles ---
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn(); // In a real app, this should be more restricted
+      allow create, update: if isSignedIn() && userId == userId() && isValidUser(incoming());
+      
+      function isValidUser(data) {
+        return data.keys().hasAll(['uid', 'email', 'displayName', 'photoURL', 'role', 'createdAt'])
+          && data.uid == userId()
+          && data.email is string
+          && data.role in ['teacher', 'student', 'admin']
+          && data.createdAt is timestamp;
+      }
+    }
+
+    // --- Classes ---
+    match /classes/{classId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn(); // Only let students see classes they are in? No, listing all classes is for join flow.
+      allow create: if isSignedIn() && isValidClass(incoming());
+      allow update: if isSignedIn() && isClassTeacher(classId) && isValidClass(incoming());
+      allow delete: if isSignedIn() && isClassTeacher(classId);
+
+      function isValidClass(data) {
+        return data.keys().hasAll(['name', 'ownerId', 'joinCode', 'themeColor', 'createdAt'])
+          && data.ownerId == userId()
+          && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+          && data.joinCode is string && data.joinCode.size() == 7
+          && data.themeColor is string
+          && data.createdAt is timestamp;
+      }
+
+      // --- Enrollments ---
+      match /enrollments/{enrollmentId} {
+        allow get: if isSignedIn();
+        allow list: if isClassMember(classId) || isClassTeacher(classId);
+        allow create: if isSignedIn() && enrollmentId == userId() && isValidEnrollment(incoming());
+        allow delete: if isSignedIn() && (enrollmentId == userId() || isClassTeacher(classId));
+
+        function isValidEnrollment(data) {
+          return data.keys().hasAll(['userId', 'classId', 'role', 'enrolledAt'])
+            && data.userId == userId()
+            && data.classId == classId
+            && data.role in ['teacher', 'student']
+            && data.enrolledAt is timestamp;
+        }
+      }
+
+      // --- Posts & Comments ---
+      match /posts/{postId} {
+        allow read: if isClassMember(classId) || isClassTeacher(classId);
+        allow create: if (isClassMember(classId) || isClassTeacher(classId)) && isValidPost(incoming());
+        allow delete: if isClassTeacher(classId) || existing().authorId == userId();
+
+        function isValidPost(data) {
+          return data.keys().hasAll(['classId', 'authorId', 'content', 'type', 'createdAt'])
+            && data.authorId == userId()
+            && data.classId == classId
+            && data.type in ['announcement', 'assignment']
+            && data.content is string && data.content.size() > 0
+            && data.createdAt is timestamp;
+        }
+
+        match /comments/{commentId} {
+          allow read: if isClassMember(classId) || isClassTeacher(classId);
+          allow create: if (isClassMember(classId) || isClassTeacher(classId)) && isValidComment(incoming());
+          allow delete: if isClassTeacher(classId) || existing().authorId == userId();
+
+          function isValidComment(data) {
+            return data.keys().hasAll(['parentId', 'authorId', 'content', 'createdAt'])
+              && data.authorId == userId()
+              && data.parentId == postId
+              && data.content is string && data.content.size() > 0
+              && data.createdAt is timestamp;
+          }
+        }
+      }
+
+      // --- Assignments & Submissions ---
+      match /assignments/{assignmentId} {
+        allow read: if isClassMember(classId) || isClassTeacher(classId);
+        allow create, update: if isClassTeacher(classId) && isValidAssignment(incoming());
+        allow delete: if isClassTeacher(classId);
+
+        function isValidAssignment(data) {
+          return data.keys().hasAll(['classId', 'title', 'description', 'dueDate', 'points', 'createdAt'])
+            && data.classId == classId
+            && data.title is string && data.title.size() > 0
+            && data.points is number
+            && data.createdAt is timestamp;
+        }
+
+        match /submissions/{submissionId} {
+          allow read: if isClassTeacher(classId) || submissionId == userId();
+          allow create: if isClassMember(classId) && submissionId == userId() && isValidSubmission(incoming());
+          allow update: if (isClassTeacher(classId) || submissionId == userId()) && isValidSubmission(incoming());
+
+          function isValidSubmission(data) {
+            return data.keys().hasAll(['assignmentId', 'studentId', 'content', 'status', 'submittedAt'])
+              && data.studentId == submissionId
+              && data.assignmentId == assignmentId
+              && data.status in ['submitted', 'graded', 'returned']
+              && data.submittedAt is timestamp;
+          }
+        }
+      }
+    }
+  }
+}
