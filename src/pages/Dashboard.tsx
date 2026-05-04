@@ -17,8 +17,11 @@ export default function Dashboard() {
   const [error, setError] = useState('');
 
   const fetchClasses = async () => {
-    if (!user) return;
-    console.log('Fetching classes for user:', user.id);
+    if (!user) {
+      console.log('No user found, skipping fetch');
+      return;
+    }
+    console.log('--- Fetching classes for user:', user.id, '---');
     setLoading(true);
     
     try {
@@ -29,14 +32,13 @@ export default function Dashboard() {
         .eq('user_id', user.id);
 
       if (enrollmentError) {
-        console.error('Enrollment fetch error:', enrollmentError);
+        console.error('Enrollment fetch error:', enrollmentError.message);
       }
 
       const classIds = enrollments ? enrollments.map(e => e.class_id) : [];
-      console.log('User enrollments:', classIds);
+      console.log('User is enrolled in IDs:', classIds);
       
       // 2. Fetch classes (Owned OR Enrolled)
-      // We do two separate fetches to be safer with RLS and query complexity
       const [ownedRes, enrolledRes] = await Promise.all([
         supabase.from('classes').select('*').eq('owner_id', user.id),
         classIds.length > 0 
@@ -44,14 +46,16 @@ export default function Dashboard() {
           : Promise.resolve({ data: [], error: null })
       ]);
 
-      if (ownedRes.error) console.error('Owned classes fetch error:', ownedRes.error);
-      if (enrolledRes.error) console.error('Enrolled classes fetch error:', enrolledRes.error);
+      if (ownedRes.error) console.error('Owned classes fetch error:', ownedRes.error.message);
+      if (enrolledRes.error) console.error('Enrolled classes fetch error:', enrolledRes.error.message);
 
       // Combine and deduplicate
       const combined = [...(ownedRes.data || []), ...(enrolledRes.data || [])];
       const uniqueClasses = Array.from(new Map(combined.map(c => [c.id, c])).values());
 
-      console.log('Total unique classes found:', uniqueClasses.length);
+      console.log(`Success: Found ${ownedRes.data?.length || 0} owned and ${enrolledRes.data?.length || 0} enrolled.`);
+      console.log('Final unique list count:', uniqueClasses.length);
+      
       setClasses(uniqueClasses as Class[]);
     } catch (err) {
       console.error('Unexpected error fetching classes:', err);
