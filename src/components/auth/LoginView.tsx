@@ -51,10 +51,10 @@ export default function LoginView() {
         <div className="p-8 md:p-12">
           <div className="text-center mb-10 flex flex-col items-center">
             <div className="w-16 h-16 bg-brand-text rounded-2xl flex items-center justify-center text-white font-serif italic text-4xl mb-6 shadow-2xl shadow-brand-text/20 transform -rotate-12">S</div>
-            <h1 className="text-3xl font-serif italic text-brand-text tracking-tight mb-2">
+            <h1 className="text-3xl font-serif text-brand-text tracking-tight mb-2">
               Scholeduc <span className="opacity-30">{isRegistering ? 'Registration' : 'Login'}</span>
             </h1>
-            <p className="text-brand-text/40 leading-relaxed font-serif italic text-lg px-4">
+            <p className="text-brand-text/40 leading-relaxed font-serif text-lg px-4">
               {isRegistering ? 'Create your academic profile.' : 'Continue your educational journey.'}
             </p>
           </div>

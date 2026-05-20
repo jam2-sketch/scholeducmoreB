@@ -24,26 +24,27 @@ export function ScholeducProvider({ children }: { children: React.ReactNode }) {
     let subscription: { unsubscribe: () => void } | null = null;
     let isMounted = true;
 
-    // Safety timeout: stop loading after 5 seconds no matter what
+    // Safety timeout: stop loading after 10 seconds to avoid blank screen
     const timeoutId = setTimeout(() => {
       if (isMounted) {
-        console.warn('Auth initialization timed out, forcing loading state to false');
+        console.warn('Auth system taking too long - forcing UI ready state');
         setLoading(false);
       }
-    }, 5000);
+    }, 10000);
 
     const init = async () => {
-      console.log('Initializing Scholeduc Auth...');
+      console.log('Initializing Secure Session...');
       try {
-        // If Supabase keys are missing, the proxy will throw on function call.
-        // We catch it and handle it gracefully.
+        // Attempt to get session - this will fail if URLs are missing
+        const sessionRes = await supabase.auth.getSession();
         
-        // Check session
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) throw error;
-        
-        const currentUser = session?.user ?? null;
-        console.log('Initial user state:', currentUser?.id || 'No user');
+        if (sessionRes.error) {
+          console.error('Supabase Auth Error:', sessionRes.error.message);
+          throw sessionRes.error;
+        }
+
+        const currentUser = sessionRes.data.session?.user ?? null;
+        console.log('Auth Active:', currentUser?.id || 'Anonymous');
         
         if (isMounted) {
           setUser(currentUser);
@@ -52,35 +53,29 @@ export function ScholeducProvider({ children }: { children: React.ReactNode }) {
           }
         }
 
-        // Setup Listener
-        console.log('Setting up auth change listener...');
         const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
-          console.log('Auth state changed:', _event, session?.user?.id || 'No user');
           if (!isMounted) return;
+          console.log('Session Transition:', _event);
           
-          try {
-            const currentUser = session?.user ?? null;
-            setUser(currentUser);
-            if (currentUser) {
-              await fetchProfile(currentUser.id);
-            } else {
-              setProfile(null);
-            }
-          } catch (err) {
-            console.error('Auth listener processing error:', err);
-          } finally {
-            setLoading(false);
+          const newUser = session?.user ?? null;
+          setUser(newUser);
+          if (newUser) {
+            await fetchProfile(newUser.id);
+          } else {
+            setProfile(null);
           }
+          setLoading(false);
         });
         
         if (isMounted) {
           subscription = data.subscription;
         }
-      } catch (err) {
-        console.error('Core Auth Initialization Failure:', err);
+      } catch (err: any) {
+        console.error('Critical initialization failure:', err);
+        // If it's a configuration error, we want the loading to stop so the ErrorBoundary or Login can handle it
+        if (isMounted) setLoading(false);
       } finally {
         if (isMounted) {
-          console.log('Loading finished.');
           setLoading(false);
           clearTimeout(timeoutId);
         }

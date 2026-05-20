@@ -11,9 +11,10 @@ export default function Stream({ cls }: { cls: Class }) {
   const [posts, setPosts] = useState<Post[]>([]);
   const [isPosting, setIsPosting] = useState(false);
   const [newPostContent, setNewPostContent] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
+  const fetchPosts = async () => {
+    try {
       const { data, error } = await supabase
         .from('posts')
         .select('*')
@@ -21,12 +22,17 @@ export default function Stream({ cls }: { cls: Class }) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error(error);
+        console.error('Fetch posts error:', error);
+        setError(`Failed to fetch posts: ${error.message}`);
       } else {
-        setPosts(data as Post[]);
+        setPosts(data as Post[] || []);
       }
-    };
+    } catch (err: any) {
+      setError(err.message || 'Unexpected error fetching posts');
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
 
     const channel = supabase
@@ -46,6 +52,7 @@ export default function Stream({ cls }: { cls: Class }) {
   const handlePost = async () => {
     if (!profile || !user || !newPostContent.trim()) return;
 
+    setError(null);
     try {
       const { error } = await supabase
         .from('posts')
@@ -62,8 +69,10 @@ export default function Stream({ cls }: { cls: Class }) {
       if (error) throw error;
       setNewPostContent('');
       setIsPosting(false);
-    } catch (err) {
-      console.error(err);
+      fetchPosts(); // Manual trigger
+    } catch (err: any) {
+      console.error('Post creation error:', err);
+      setError(err.message || 'Failed to publish post. Check database permissions.');
     }
   };
 
@@ -72,11 +81,25 @@ export default function Stream({ cls }: { cls: Class }) {
       <div className="col-span-12 lg:col-span-8 space-y-8">
         <div className="flex items-center justify-between mb-4">
            <h2 className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-30">The Stream</h2>
-           <div className="w-1/3 h-px bg-brand-border" />
+           <div className="flex items-center gap-4">
+              <button 
+                onClick={fetchPosts}
+                className="text-[10px] uppercase tracking-widest font-bold text-blue-600 hover:opacity-50 transition-all"
+              >
+                Sync Feed
+              </button>
+              <div className="w-24 h-px bg-brand-border" />
+           </div>
         </div>
 
+        {error && (
+          <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-serif italic mb-6">
+            {error}
+          </div>
+        )}
+
         {/* Post Box */}
-        <div className="bg-white border border-brand-border p-8 rounded-3xl group transition-all hover:border-[#1A1A1A]/20">
+        <div className="bg-white border border-brand-border p-5 sm:p-8 rounded-3xl group transition-all hover:border-[#1A1A1A]/20">
           {!isPosting ? (
             <button 
               onClick={() => setIsPosting(true)}
@@ -87,7 +110,7 @@ export default function Stream({ cls }: { cls: Class }) {
                   <img src={profile.photo_url} className="w-full h-full rounded-full grayscale hover:grayscale-0 transition-all" alt="Me" referrerPolicy="no-referrer" />
                 ) : <User className="w-6 h-6 text-brand-text/20" />}
               </div>
-              <p className="text-xl font-serif italic text-brand-text/30 group-hover:text-brand-text/50 transition-colors">Shared an announcement with your audience...</p>
+              <p className="text-xl font-serif text-brand-text/30 group-hover:text-brand-text/50 transition-colors">Shared an announcement with your audience...</p>
             </button>
           ) : (
             <motion.div 
@@ -100,7 +123,7 @@ export default function Stream({ cls }: { cls: Class }) {
                 value={newPostContent}
                 onChange={(e) => setNewPostContent(e.target.value)}
                 placeholder="Compose your message..."
-                className="w-full min-h-[150px] bg-brand-bg rounded-xl p-6 text-brand-text border border-brand-border focus:outline-none focus:border-brand-text transition-all font-serif italic text-lg leading-relaxed placeholder:text-brand-text/20"
+                className="w-full min-h-[150px] bg-brand-bg rounded-xl p-6 text-brand-text border border-brand-border focus:outline-none focus:border-brand-text transition-all font-serif text-lg leading-relaxed placeholder:text-brand-text/20"
               />
               <div className="flex justify-end gap-4">
                  <button onClick={() => setIsPosting(false)} className="text-[10px] font-bold uppercase tracking-widest text-brand-text/30 hover:text-brand-text/60">Cancel</button>
@@ -128,7 +151,7 @@ export default function Stream({ cls }: { cls: Class }) {
       {/* Right Sidebar */}
       <aside className="col-span-12 lg:col-span-4 space-y-12">
         {/* AI Insight Box */}
-        <div className="bg-[#F1F5F9] border border-blue-200 p-8 rounded-[2rem] relative overflow-hidden group">
+        <div className="bg-[#F1F5F9] border border-blue-200 p-5 sm:p-8 rounded-[2rem] relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-400 opacity-5 blur-3xl group-hover:opacity-10 transition-opacity" />
           <div className="flex items-center gap-3 mb-6">
             <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-200">
@@ -253,7 +276,7 @@ function PostCard({ post, classId }: PostCardProps) {
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`bg-white p-8 rounded-3xl border transition-all ${isAssignment ? 'border-2 border-brand-text' : 'border-brand-border shadow-sm'}`}
+      className={`bg-white p-5 sm:p-8 rounded-3xl border transition-all ${isAssignment ? 'border-2 border-brand-text' : 'border-brand-border shadow-sm'}`}
     >
       <header className="flex justify-between items-start mb-6">
         <div className="flex items-center gap-4">

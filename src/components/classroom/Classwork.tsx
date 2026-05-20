@@ -16,9 +16,10 @@ export default function Classwork({ cls }: { cls: Class }) {
   const [dueDate, setDueDate] = useState('');
   const [points, setPoints] = useState(100);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchAssignments = async () => {
+  const fetchAssignments = async () => {
+    try {
       const { data, error } = await supabase
         .from('assignments')
         .select('*')
@@ -26,12 +27,17 @@ export default function Classwork({ cls }: { cls: Class }) {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error(error);
+        console.error('Fetch assignments error:', error);
+        setError(`Access Issue: ${error.message}`);
       } else {
-        setAssignments(data as Assignment[]);
+        setAssignments(data as Assignment[] || []);
       }
-    };
+    } catch (err: any) {
+      setError(err.message || 'Unexpected curriculum sync error');
+    }
+  };
 
+  useEffect(() => {
     fetchAssignments();
 
     const channel = supabase
@@ -52,6 +58,7 @@ export default function Classwork({ cls }: { cls: Class }) {
     e.preventDefault();
     if (!profile || !user) return;
 
+    setError(null);
     try {
       const { data: assignmentData, error: assignmentError } = await supabase
         .from('assignments')
@@ -87,8 +94,10 @@ export default function Classwork({ cls }: { cls: Class }) {
       setShowCreateModal(false);
       setNewTitle('');
       setNewDescription('');
-    } catch (err) {
-      console.error(err);
+      fetchAssignments();
+    } catch (err: any) {
+      console.error('Assignment creation error:', err);
+      setError(err.message || 'Draft preservation failed. Check database permissions.');
     }
   };
 
@@ -106,24 +115,36 @@ export default function Classwork({ cls }: { cls: Class }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-12">
-      <header className="flex justify-between items-end border-b border-brand-border pb-6">
+    <div className="max-w-4xl mx-auto space-y-8 md:space-y-12">
+      <header className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 border-b border-brand-border pb-6">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-blue-600">Academic Catalog</span>
+              <button 
+                onClick={fetchAssignments}
+                className="text-[9px] font-bold text-blue-600 hover:opacity-50 transition-opacity uppercase tracking-widest"
+              >
+                Sync Curriculum
+              </button>
               <div className="w-8 h-px bg-brand-border" />
            </div>
-           <h2 className="text-4xl font-serif italic text-brand-text">Curriculum <span className="opacity-30">&</span> Modules</h2>
+           <h2 className="text-3xl sm:text-4xl font-serif italic text-brand-text">Curriculum <span className="opacity-30">&</span> Modules</h2>
         </div>
         {profile?.role === 'teacher' && (
           <button 
             onClick={() => setShowCreateModal(true)}
-            className="bg-brand-text text-white px-8 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-brand-text/10 hover:scale-105 active:scale-95 transition-all"
+            className="bg-brand-text text-white px-6 sm:px-8 py-2.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-xl shadow-brand-text/10 hover:scale-105 active:scale-95 transition-all self-start sm:self-auto"
           >
             Draft Assignment
           </button>
         )}
       </header>
+
+      {error && (
+        <div className="p-4 bg-red-50 border border-red-100 text-red-600 rounded-2xl text-xs font-serif italic">
+          {error}
+        </div>
+      )}
 
       <section className="space-y-6">
         {assignments.length === 0 ? (
@@ -136,7 +157,7 @@ export default function Classwork({ cls }: { cls: Class }) {
             <motion.div 
                key={assignment.id}
                whileHover={{ x: 6 }}
-               className="group bg-white rounded-2xl p-6 border border-brand-border flex items-center gap-8 transition-all hover:border-brand-text/20 cursor-pointer"
+               className="group bg-white rounded-2xl p-4 sm:p-6 border border-brand-border flex items-center gap-4 sm:gap-8 transition-all hover:border-brand-text/20 cursor-pointer"
             >
                <div className="w-12 h-12 rounded-xl bg-brand-bg flex items-center justify-center border border-brand-border group-hover:bg-brand-text group-hover:text-white transition-all shrink-0">
                   <FileText className="w-5 h-5 opacity-40 group-hover:opacity-100" />
