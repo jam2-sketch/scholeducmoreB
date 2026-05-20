@@ -1,48 +1,37 @@
-import React, { StrictMode, Component, ReactNode, ErrorInfo } from 'react';
+import React, { StrictMode, useState, useEffect, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
 
-// Simple Error Boundary for runtime errors
-class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean, error: Error | null }> {
-  constructor(props: any) {
-    super(props);
-    this.state = { hasError: false, error: null };
+console.log('[main.tsx] Script started');
+
+// Simple Error Boundary using functional component
+function ErrorBoundary({ children }: { children: ReactNode }) {
+  const [hasError, setHasError] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error('Caught error:', event.error);
+      setHasError(true);
+      setError(event.error);
+      event.preventDefault();
+    };
+
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+
+  if (hasError && error) {
+    return (
+      <div style={{ padding: '20px', fontFamily: 'sans-serif', background: '#fee2e2', minHeight: '100vh' }}>
+        <h1 style={{ color: '#dc2626' }}>Error: {error.message}</h1>
+        <button onClick={() => window.location.reload()}>Reload</button>
+      </div>
+    );
   }
 
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-red-50 p-10 font-sans">
-          <div className="max-w-md w-full bg-white p-8 rounded-3xl shadow-xl border border-red-100 text-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-4 font-serif italic">Scholeduc System Error</h1>
-            <p className="text-gray-600 mb-6 text-sm leading-relaxed">
-              {this.state.error?.message || 'A critical error occurred while initializing the architecture.'}
-            </p>
-            <button 
-              onClick={() => window.location.reload()}
-              className="w-full bg-brand-text text-white py-3 rounded-xl font-bold hover:bg-black transition-colors"
-            >
-              Restart Environment
-            </button>
-            <p className="mt-4 text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em]">
-              Debug Terminal: F12 / Inspect
-            </p>
-          </div>
-        </div>
-      );
-    }
-
-    return this.props.children;
-  }
+  return children;
 }
 
 createRoot(document.getElementById('root')!).render(

@@ -12,13 +12,14 @@ function AppContent() {
   const { user, profile, loading } = useScholeduc();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  console.log('[AppContent] user:', user?.id, 'profile:', profile?.uid, 'loading:', loading);
+  console.log('[AppContent] Rendering - user:', user?.id, 'profile:', profile?.uid, 'loading:', loading);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white flex-col gap-4">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Opening Scholeduc...</span>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fff', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ width: '48px', height: '48px', border: '4px solid #2563eb', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Opening Scholeduc...</span>
       </div>
     );
   }
@@ -50,6 +51,7 @@ function AppContent() {
 }
 
 export default function App() {
+  console.log('[App] Rendering');
   return (
     <BrowserRouter>
       <ScholeducProvider>
