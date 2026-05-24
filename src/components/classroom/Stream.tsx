@@ -77,7 +77,7 @@ export default function Stream({ cls }: { cls: Class }) {
   };
 
   return (
-    <div className="grid grid-cols-12 gap-10">
+    <div className="grid grid-cols-12 gap-6 lg:gap-10">
       <div className="col-span-12 lg:col-span-8 space-y-8">
         <div className="flex items-center justify-between mb-4">
            <h2 className="text-[10px] uppercase tracking-[0.3em] font-bold opacity-30">The Stream</h2>
@@ -103,14 +103,14 @@ export default function Stream({ cls }: { cls: Class }) {
           {!isPosting ? (
             <button 
               onClick={() => setIsPosting(true)}
-              className="w-full flex items-center gap-6 text-left"
+              className="w-full flex items-center gap-4 sm:gap-6 text-left"
             >
               <div className="w-12 h-12 rounded-full border border-brand-border flex items-center justify-center bg-brand-bg shrink-0">
                 {profile?.photo_url ? (
                   <img src={profile.photo_url} className="w-full h-full rounded-full grayscale hover:grayscale-0 transition-all" alt="Me" referrerPolicy="no-referrer" />
                 ) : <User className="w-6 h-6 text-brand-text/20" />}
               </div>
-              <p className="text-xl font-serif text-brand-text/30 group-hover:text-brand-text/50 transition-colors">Shared an announcement with your audience...</p>
+              <p className="text-lg sm:text-xl font-serif text-brand-text/30 group-hover:text-brand-text/50 transition-colors break-words flex-1">Shared an announcement with your audience...</p>
             </button>
           ) : (
             <motion.div 
@@ -302,12 +302,12 @@ function PostCard({ post, classId }: PostCardProps) {
         </p>
         
         {isAssignment && (
-          <div className="bg-brand-bg rounded-2xl border border-dashed border-brand-border p-6 flex items-center justify-between">
-             <div>
+          <div className="bg-brand-bg rounded-2xl border border-dashed border-brand-border p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+             <div className="min-w-0 flex-1 max-w-full">
                 <p className="text-[11px] font-bold opacity-40 uppercase tracking-widest mb-1">Associated Module</p>
-                <p className="text-sm font-bold underline decoration-brand-text/10 underline-offset-4 cursor-pointer hover:text-blue-600 transition-all">Curriculum_Standards_v2.pdf</p>
+                <p className="text-sm font-bold underline decoration-brand-text/10 underline-offset-4 cursor-pointer hover:text-blue-600 transition-all break-all sm:break-normal">Curriculum_Standards_v2.pdf</p>
              </div>
-             <button className="px-6 py-2 bg-brand-text text-white text-[10px] font-bold rounded-full uppercase tracking-widest shadow-lg shadow-brand-text/10">Launch Draft</button>
+             <button className="px-6 py-2 bg-brand-text text-white text-[10px] font-bold rounded-full uppercase tracking-widest shadow-lg shadow-brand-text/10 whitespace-nowrap shrink-0 self-start sm:self-auto">Launch Draft</button>
           </div>
         )}
       </div>

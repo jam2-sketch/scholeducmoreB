@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, BookOpen, Users, BarChart3, Settings, Hash, ArrowLeft, Plus } from 'lucide-react';
+import { LayoutDashboard, BookOpen, Users, BarChart3, Settings, Hash, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { Class } from '../types';
 import Stream from '../components/classroom/Stream';
 import Classwork from '../components/classroom/Classwork';
 import People from '../components/classroom/People';
 
-type Tab = 'stream' | 'classwork' | 'people' | 'grades';
+type Tab = 'stream' | 'classwork' | 'people';
 
 export default function ClassDetail() {
   const { classId } = useParams();
@@ -69,7 +69,6 @@ export default function ClassDetail() {
     { id: 'stream', label: 'Stream', icon: Hash },
     { id: 'classwork', label: 'Classwork', icon: BookOpen },
     { id: 'people', label: 'People', icon: Users },
-    { id: 'grades', label: 'Grades', icon: BarChart3 },
   ];
 
   return (
@@ -97,28 +96,6 @@ export default function ClassDetail() {
             </div>
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-5xl font-serif tracking-tight text-brand-text break-words">{cls.name}</h1>
-        </div>
-        <div className="flex items-center justify-between md:justify-end gap-6 mt-4 md:mt-0 w-full md:w-auto border-t border-brand-border md:border-0 pt-4 md:pt-0">
-          <div className="text-left md:text-right">
-            <p className="text-xs font-bold">Class Identity</p>
-            <p className="text-[10px] opacity-50 uppercase tracking-widest">Digital Hub</p>
-          </div>
-          <button 
-            onClick={() => {
-              if (activeTab === 'stream') {
-                // We'll rely on the Stream component's own posting state if we can find a way,
-                // but for now let's use a simpler approach or just switch tab.
-                setActiveTab('stream');
-              } else if (activeTab === 'classwork') {
-                // This would ideally trigger the modal in Classwork, 
-                // but since they are separate routes/components it's tricky without a store.
-                // For now, we'll just ensure the tabs work well.
-              }
-            }}
-            className="w-12 h-12 bg-brand-text text-white rounded-full flex items-center justify-center text-xl shadow-lg transform rotate-45 hover:scale-110 active:scale-95 transition-all"
-          >
-            <Plus className="w-6 h-6 transform -rotate-45" />
-          </button>
         </div>
       </header>
 
@@ -149,7 +126,6 @@ export default function ClassDetail() {
             {activeTab === 'stream' && <Stream cls={cls} />}
             {activeTab === 'classwork' && <Classwork cls={cls} />}
             {activeTab === 'people' && <People cls={cls} />}
-            {activeTab === 'grades' && <div className="p-20 text-center text-brand-text/30 font-serif italic">Gradebook management coming soon to Scholeduc OS...</div>}
           </motion.div>
         </AnimatePresence>
       </div>
