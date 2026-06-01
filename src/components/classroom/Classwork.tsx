@@ -358,24 +358,28 @@ export default function Classwork({ cls }: { cls: Class }) {
                <div className="w-12 h-12 rounded-xl bg-brand-bg flex items-center justify-center border border-brand-border group-hover:bg-brand-text group-hover:text-white transition-all shrink-0">
                   <FileText className="w-5 h-5 opacity-40 group-hover:opacity-100" />
                </div>
-               <div className="flex-1">
-                  <h3 className="text-lg font-bold text-brand-text tracking-tight uppercase group-hover:text-blue-600 transition-colors">{assignment.title}</h3>
-                  <div className="flex items-center gap-6 mt-1">
-                    <div className="flex items-center gap-2 text-[10px] font-bold text-brand-text/30 uppercase tracking-widest">
-                       <Clock className="w-3.5 h-3.5" />
+               <div className="flex-1 min-w-0">
+                  <h3 className="text-base sm:text-lg font-bold text-brand-text tracking-tight uppercase group-hover:text-blue-600 transition-colors break-words">{assignment.title}</h3>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2">
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-brand-text/60 uppercase tracking-widest bg-brand-bg px-2 py-1 rounded-md border border-brand-border">
+                       <Clock className="w-3.5 h-3.5 text-brand-text/50" />
                        Posted {formatDate(assignment.created_at)}
                     </div>
                     {assignment.due_date && (
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-orange-600/60 uppercase tracking-widest">
-                         <Target className="w-3.5 h-3.5" />
+                      <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-orange-850 uppercase tracking-widest bg-orange-100/80 px-2   py-1 rounded-md border border-orange-200">
+                         <Target className="w-3.5 h-3.5 text-orange-700" />
                          Due {formatDate(assignment.due_date)}
                       </div>
                     )}
+                    <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-blue-800 uppercase tracking-widest bg-blue-100/80 px-2 py-1 rounded-md border border-blue-250 sm:hidden">
+                       <FileText className="w-3.5 h-3.5 text-blue-700" />
+                       {assignment.points} Credits
+                    </div>
                   </div>
                </div>
-               <div className="text-right hidden sm:block">
-                  <p className="text-xl font-serif italic text-brand-text">{assignment.points}</p>
-                  <p className="text-[9px] uppercase tracking-widest opacity-30 font-bold">Credits</p>
+               <div className="text-right hidden sm:block shrink-0">
+                  <p className="text-2xl font-serif italic text-brand-text font-bold">{assignment.points}</p>
+                  <p className="text-[10px] uppercase tracking-widest opacity-55 font-bold">Credits</p>
                </div>
                <ChevronRight className="w-5 h-5 opacity-10 group-hover:opacity-100 transition-opacity" />
             </motion.div>
@@ -392,46 +396,46 @@ export default function Classwork({ cls }: { cls: Class }) {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative w-full max-w-2xl bg-white rounded-[40px] p-12 border border-brand-border shadow-2xl shadow-brand-text/5 overflow-hidden overflow-y-auto max-h-[90vh]"
+                className="relative w-full max-w-2xl bg-white rounded-3xl sm:rounded-[40px] p-5 sm:p-12 border border-brand-border shadow-2xl shadow-brand-text/5 overflow-hidden overflow-y-auto max-h-[90vh]"
              >
                 <button 
                   onClick={() => setShowCreateModal(false)}
-                  className="absolute top-8 right-8 w-10 h-10 rounded-full border border-brand-border flex items-center justify-center text-brand-text/20 hover:text-brand-text transition-colors"
+                  className="absolute top-4 right-4 sm:top-8 sm:right-8 w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-brand-border flex items-center justify-center text-brand-text/30 hover:text-brand-text transition-colors cursor-pointer"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
                 </button>
 
-                <div className="flex items-center gap-6 mb-12">
-                   <div className="w-16 h-16 bg-brand-text rounded-2xl flex items-center justify-center shadow-2xl shadow-brand-text/20">
-                      <Plus className="w-8 h-8 text-white" />
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 mb-8 sm:mb-12">
+                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-brand-text rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl shadow-brand-text/20 shrink-0">
+                      <Plus className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                    </div>
                    <div>
                        <div className="flex items-center gap-3 mb-1">
                           <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-blue-600">Module Creation</span>
                           <div className="w-8 h-px bg-brand-border" />
                        </div>
-                       <h2 className="text-4xl font-serif italic text-brand-text tracking-tight">Draft <span className="opacity-30">Assignment</span></h2>
+                       <h2 className="text-2xl sm:text-4xl font-serif italic text-brand-text tracking-tight">Draft <span className="opacity-30">Assignment</span></h2>
                    </div>
                 </div>
 
-                <form onSubmit={handleCreateAssignment} className="space-y-10">
-                   <div className="grid grid-cols-2 gap-6">
-                      <div className="bg-brand-bg p-6 rounded-3xl border border-brand-border flex flex-col items-center">
+                <form onSubmit={handleCreateAssignment} className="space-y-6 sm:space-y-10">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="bg-brand-bg p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-brand-border flex flex-col items-center">
                          <label className="block text-[8px] font-bold uppercase text-brand-text/30 tracking-[0.3em] mb-2">Credit Value</label>
                          <input 
                            type="number" 
                            value={points} 
                            onChange={(e) => setPoints(Number(e.target.value))}
-                           className="w-full bg-transparent text-center font-serif italic text-3xl text-brand-text focus:outline-none" 
+                           className="w-full bg-transparent text-center font-serif italic text-2xl sm:text-3xl text-brand-text focus:outline-none" 
                          />
                       </div>
-                      <div className="bg-brand-bg p-6 rounded-3xl border border-brand-border flex flex-col items-center">
+                      <div className="bg-brand-bg p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-brand-border flex flex-col items-center">
                          <label className="block text-[8px] font-bold uppercase text-brand-text/30 tracking-[0.3em] mb-2">Target Date</label>
                          <input 
                            type="date" 
                            value={dueDate} 
                            onChange={(e) => setDueDate(e.target.value)}
-                           className="w-full bg-transparent text-center text-xs font-bold text-brand-text focus:outline-none uppercase tracking-widest" 
+                           className="w-full bg-transparent text-center text-xs font-bold text-brand-text focus:outline-none uppercase tracking-widest cursor-pointer" 
                          />
                       </div>
                    </div>
@@ -445,7 +449,7 @@ export default function Classwork({ cls }: { cls: Class }) {
                           value={newTitle}
                           onChange={(e) => setNewTitle(e.target.value)}
                           placeholder="Untitled Masterpiece..."
-                          className="w-full text-2xl font-serif italic text-brand-text placeholder:text-brand-text/10 border-none focus:ring-0 outline-none p-0"
+                          className="w-full text-lg sm:text-2xl font-serif italic text-brand-text placeholder:text-brand-text/10 border-none focus:ring-0 outline-none p-0"
                         />
                       </div>
                       
@@ -455,32 +459,32 @@ export default function Classwork({ cls }: { cls: Class }) {
                            value={newDescription}
                            onChange={(e) => setNewDescription(e.target.value)}
                            placeholder="Describe the instructions for your students..."
-                           className="w-full min-h-[250px] bg-brand-bg rounded-3xl p-8 text-brand-text border border-brand-border focus:outline-none focus:border-brand-text/20 transition-all font-serif italic text-xl leading-relaxed placeholder:text-brand-text/10"
+                           className="w-full min-h-[180px] sm:min-h-[250px] bg-brand-bg rounded-2xl sm:rounded-3xl p-4 sm:p-8 pr-14 sm:pr-24 text-brand-text border border-brand-border focus:outline-none focus:border-brand-text/20 transition-all font-serif italic text-sm sm:text-xl leading-relaxed placeholder:text-brand-text/10"
                         />
                         <button 
                            type="button"
                            onClick={handleAIAssist}
                            disabled={!newTitle || isGenerating}
-                           className="absolute top-6 right-6 bg-brand-text text-white p-3 rounded-full shadow-2xl hover:scale-110 transition-all transform active:scale-90 disabled:opacity-10 flex items-center gap-2"
+                           className="absolute top-4 right-4 sm:top-6 sm:right-6 bg-brand-text text-white p-2.5 sm:p-3 rounded-full shadow-2xl hover:scale-110 transition-all transform active:scale-90 disabled:opacity-10 flex items-center justify-center cursor-pointer"
                         >
-                           {isGenerating ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                           {isGenerating ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />}
                         </button>
                       </div>
                    </div>
 
-                   <div className="flex justify-between items-center pt-8 border-t border-brand-border">
-                      <p className="text-[9px] font-bold text-brand-text/20 uppercase tracking-[0.2em]">Revision Status: Pristine</p>
-                      <div className="flex gap-4">
+                   <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 pt-6 sm:pt-8 border-t border-brand-border">
+                      <p className="text-[9px] font-bold text-brand-text/20 uppercase tracking-[0.2em] text-center sm:text-left">Revision Status: Pristine</p>
+                      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
                         <button 
                            type="button"
                            onClick={() => setShowCreateModal(false)}
-                           className="px-8 py-3 text-[10px] font-bold uppercase tracking-widest text-brand-text/30 hover:text-brand-text transition-colors"
+                           className="w-full sm:w-auto px-6 sm:px-8 py-2.5 sm:py-3 text-[10px] font-bold uppercase tracking-widest text-brand-text/30 hover:text-brand-text transition-colors text-center cursor-pointer"
                         >
                            Discard
                         </button>
                         <button 
                            type="submit"
-                           className="bg-brand-text text-white px-10 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.3em] shadow-2xl shadow-brand-text/20 hover:scale-105 transition-all active:scale-95"
+                           className="w-full sm:w-auto bg-brand-text text-white px-8 sm:px-10 py-3 rounded-full text-[10px] font-bold uppercase tracking-[0.3em] shadow-2xl shadow-brand-text/20 hover:scale-[1.02] active:scale-[0.98] transition-all text-center cursor-pointer"
                         >
                            Publish Assignment
                         </button>
@@ -529,20 +533,20 @@ export default function Classwork({ cls }: { cls: Class }) {
                          </div>
                       </div>
 
-                      <div className="grid grid-cols-3 gap-4">
-                         <div className="p-4 bg-brand-bg rounded-2xl border border-brand-border text-center">
-                            <span className="block text-[8px] font-bold uppercase text-brand-text/30 tracking-widest mb-1">Score weight</span>
-                            <span className="text-lg font-serif italic text-brand-text">{selectedAssignment.points} pts</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                         <div className="p-4 bg-blue-50/50 border border-blue-250 rounded-2xl text-center flex flex-col justify-center">
+                            <span className="block text-[10px] font-bold uppercase text-blue-800 tracking-wider mb-1">Score Weight</span>
+                            <span className="text-base sm:text-lg font-serif font-black italic text-blue-950">{selectedAssignment.points} pts</span>
                          </div>
-                         <div className="p-4 bg-brand-bg rounded-2xl border border-brand-border text-center">
-                            <span className="block text-[8px] font-bold uppercase text-brand-text/30 tracking-widest mb-1">Target Date</span>
-                            <span className="text-[10px] font-bold text-orange-600 uppercase tracking-widest block truncate">
+                         <div className="p-4 bg-orange-50/50 border border-orange-250 rounded-2xl text-center flex flex-col justify-center">
+                            <span className="block text-[10px] font-bold uppercase text-orange-850 tracking-wider mb-1">Target Date</span>
+                            <span className="text-xs font-black text-orange-900 uppercase tracking-wider block whitespace-normal break-words">
                                {selectedAssignment.due_date ? formatDate(selectedAssignment.due_date) : 'Open-ended'}
                             </span>
                          </div>
-                         <div className="p-4 bg-brand-bg rounded-2xl border border-brand-border text-center">
-                            <span className="block text-[8px] font-bold uppercase text-brand-text/30 tracking-widest mb-1">Posted</span>
-                            <span className="text-[10px] font-bold text-brand-text/50 uppercase tracking-widest block truncate font-sans">
+                         <div className="p-4 bg-brand-bg border border-brand-border rounded-2xl text-center flex flex-col justify-center">
+                            <span className="block text-[10px] font-bold uppercase text-brand-text/60 tracking-wider mb-1">Posted</span>
+                            <span className="text-xs font-bold text-brand-text/80 uppercase tracking-wider block whitespace-normal break-words font-sans">
                                {formatDate(selectedAssignment.created_at)}
                             </span>
                          </div>

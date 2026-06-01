@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { User, Menu, LogOut } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useScholeduc } from '../../ScholeducProvider';
 
 export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
@@ -16,12 +17,12 @@ export default function Navbar({ onMenuClick }: { onMenuClick: () => void }) {
           >
             <Menu className="w-5 h-5 text-brand-text" />
           </button>
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 bg-brand-text rounded-full flex items-center justify-center text-white font-bold text-xl shadow-sm">
               <span className="font-serif">S</span>
             </div>
             <span className="text-xl font-serif italic tracking-tight text-brand-text">Scholeduc</span>
-          </div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-6">

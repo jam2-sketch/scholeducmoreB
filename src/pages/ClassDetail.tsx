@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, BookOpen, Users, BarChart3, Settings, Hash, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
@@ -12,9 +12,20 @@ type Tab = 'stream' | 'classwork' | 'people';
 
 export default function ClassDetail() {
   const { classId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('stream');
   const [cls, setCls] = useState<Class | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Synchronize activeTab state with URL search param '?tab='
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const tabParam = searchParams.get('tab');
+    if (tabParam === 'classwork' || tabParam === 'stream' || tabParam === 'people') {
+      setActiveTab(tabParam as Tab);
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (!classId) return;
@@ -30,6 +41,8 @@ export default function ClassDetail() {
         console.error(error);
       } else {
         setCls(data as Class);
+        // Cache the active class ID for global navigation (e.g., Todo & Calendar) fallback
+        localStorage.setItem('scholeduc_last_class_id', classId);
       }
       setLoading(false);
     };
@@ -103,7 +116,10 @@ export default function ClassDetail() {
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as Tab)}
+            onClick={() => {
+              setActiveTab(tab.id as Tab);
+              navigate(`/class/${classId}?tab=${tab.id}`, { replace: true });
+            }}
             className={`
               text-[11px] font-bold uppercase tracking-[0.2em] pb-3 transition-all relative shrink-0
               ${activeTab === tab.id ? 'text-blue-600 border-b-2 border-blue-600' : 'text-brand-text/30 hover:text-brand-text/60'}

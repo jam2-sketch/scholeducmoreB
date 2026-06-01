@@ -1,6 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, Calendar, BookOpen, Settings, Info, LogOut } from 'lucide-react';
+import { Calendar, BookOpen, Settings, Info, LogOut } from 'lucide-react';
 import { useScholeduc } from '../../ScholeducProvider';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -8,13 +9,32 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { profile, logout } = useScholeduc();
+  const { logout } = useScholeduc();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Parse active class ID from current URL if inside a class Detail page
+  const match = location.pathname.match(/\/class\/([^/]+)/);
+  const currentClassId = match ? match[1] : null;
+  const isCourseActive = !!currentClassId;
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Classes', href: '/' },
-    { icon: Calendar, label: 'Calendar', href: '/tasks' },
-    { icon: BookOpen, label: 'To-do', href: '/todo' },
+    { icon: Calendar, label: 'Calendar' },
+    { icon: BookOpen, label: 'To-do' },
   ];
+
+  const handleItemClick = (label: string) => {
+    if (!isCourseActive) return;
+
+    if (label === 'To-do') {
+      // Connects "To-do" to the Assignments (classwork) page inside the class
+      navigate(`/class/${currentClassId}?tab=classwork`);
+    } else if (label === 'Calendar') {
+      // Connects "Calendar" to the lower part of the Stream page with class deadlines highlighted
+      navigate(`/class/${currentClassId}?tab=stream&scroll=deadlines`);
+    }
+    onClose();
+  };
 
   return (
     <>
@@ -35,12 +55,18 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {navItems.map((item) => (
             <button
               key={item.label}
-              title={item.label}
-              className="group relative flex flex-col items-center"
+              title={isCourseActive ? item.label : `${item.label} (Enter a Course First)`}
+              disabled={!isCourseActive}
+              onClick={() => handleItemClick(item.label)}
+              className={`group relative flex flex-col items-center ${
+                isCourseActive ? 'cursor-pointer' : 'cursor-not-allowed opacity-25'
+              }`}
             >
-              <item.icon className="w-6 h-6 text-brand-text opacity-40 group-hover:opacity-100 transition-all" />
+              <item.icon className={`w-6 h-6 text-brand-text ${
+                isCourseActive ? 'opacity-40 group-hover:opacity-100 transition-all' : 'opacity-30'
+              }`} />
               <span className="absolute left-full ml-4 px-2 py-1 bg-brand-text text-white text-[10px] uppercase font-bold rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
-                {item.label}
+                {isCourseActive ? item.label : `${item.label} (Requires Course)`}
               </span>
             </button>
           ))}
